@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.digitaltwin.mapper.DatasetRawMapper">
+
+    <resultMap id="DatasetRawMap" type="DatasetRaw">
+        <id     column="id"              property="id"/>
+        <result column="animal_type"     property="animalType"/>
+        <result column="chemical_name"   property="chemicalName"/>
+        <result column="dosage"          property="dosage"/>
+        <result column="indicator_name"  property="indicatorName"/>
+        <result column="indicator_value" property="indicatorValue"/>
+        <result column="temperature"     property="temperature"/>
+        <result column="create_time"     property="createTime"/>
+    </resultMap>
+
+    <!--
+        训练集查询：精确匹配物种 + 化学物质 + 指标名称 + 温度区间
+        指标名称过滤确保同类量纲数据进行回归，不混用 ALT 与刺激评分等不同指标
+    -->
+    <select id="selectTrainingData" resultMap="DatasetRawMap">
+        SELECT id, animal_type, chemical_name, dosage,
+               indicator_name, indicator_value, temperature, create_time
+        FROM dataset_raw
+        WHERE animal_type    = #{animalType}
+          AND chemical_name  = #{chemicalName}
+          AND indicator_name = #{indicatorName}
+          AND temperature BETWEEN #{minTemp} AND #{maxTemp}
+        ORDER BY dosage ASC
+    </select>
+
+</mapper>

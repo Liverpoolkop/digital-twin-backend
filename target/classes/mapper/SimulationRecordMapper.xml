@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.digitaltwin.mapper.SimulationRecordMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO simulation_record
+            (user_id, experiment_id, target_animal, target_chemical,
+             indicator_name, input_dosage, selected_model, predicted_value)
+        VALUES
+            (#{userId}, #{experimentId}, #{targetAnimal}, #{targetChemical},
+             #{indicatorName}, #{inputDosage}, #{selectedModel}, #{predictedValue})
+    </insert>
+
+</mapper>

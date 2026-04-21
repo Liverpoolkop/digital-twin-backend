@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.digitaltwin.mapper.ExperimentMapper">
+
+    <resultMap id="BaseResultMap" type="Experiment">
+        <id     column="id"             property="id"/>
+        <result column="name"           property="name"/>
+        <result column="animal_type"    property="animalType"/>
+        <result column="chemical_name"  property="chemicalName"/>
+        <result column="indicator_name" property="indicatorName"/>
+        <result column="description"    property="description"/>
+        <result column="created_time"   property="createdTime"/>
+        <result column="updated_time"   property="updatedTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, name, animal_type, chemical_name, indicator_name, description, created_time, updated_time
+    </sql>
+
+    <sql id="Where_Name">
+        <where>
+            <if test="name != null and name != ''">
+                AND name LIKE CONCAT('%', #{name}, '%')
+            </if>
+        </where>
+    </sql>
+
+    <select id="countByName" resultType="long">
+        SELECT COUNT(*)
+        FROM experiment
+        <include refid="Where_Name"/>
+    </select>
+
+    <!-- orderColumn / orderDirection 由 Service 白名单校验后传入 -->
+    <select id="selectPage" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM experiment
+        <include refid="Where_Name"/>
+        ORDER BY
+        <choose>
+            <when test="orderColumn == 'created_time'">created_time</when>
+            <otherwise>id</otherwise>
+        </choose>
+        <choose>
+            <when test="orderDirection == 'ASC'"> ASC</when>
+            <otherwise> DESC</otherwise>
+        </choose>
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM experiment
+        WHERE id = #{id}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO experiment (name, animal_type, chemical_name, indicator_name, description)
+        VALUES (#{name}, #{animalType}, #{chemicalName}, #{indicatorName}, #{description})
+    </insert>
+
+    <update id="updateById">
+        UPDATE experiment
+        <set>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="animalType != null and animalType != ''">animal_type = #{animalType},</if>
+            <if test="chemicalName != null and chemicalName != ''">chemical_name = #{chemicalName},</if>
+            <if test="indicatorName != null and indicatorName != ''">indicator_name = #{indicatorName},</if>
+            <if test="description != null">description = #{description},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM experiment WHERE id = #{id}
+    </delete>
+
+</mapper>
