@@ -1,18 +1,15 @@
 package com.example.digitaltwin.common;
 
-import lombok.Data;
-
-@Data
 public class Result<T> {
 
     private Integer code;
-    private String  message;
-    private T       data;
+    private String message;
+    private T data;
 
     private Result(Integer code, String message, T data) {
-        this.code    = code;
+        this.code = code;
         this.message = message;
-        this.data    = data;
+        this.data = data;
     }
 
     public static <T> Result<T> success(T data) {
@@ -29,5 +26,17 @@ public class Result<T> {
 
     public static <T> Result<T> notFound() {
         return new Result<>(404, "记录不存在", null);
+    }
+
+    public Integer getCode() {
+        return code;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public T getData() {
+        return data;
     }
 }

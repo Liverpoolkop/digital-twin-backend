@@ -9,28 +9,30 @@ import java.util.List;
 @Mapper
 public interface ExperimentMapper {
 
-    /** 条件计数（与分页查询 WHERE 一致） */
-    long countByName(@Param("name") String name);
+    long countVisible(@Param("name") String name,
+                      @Param("status") String status,
+                      @Param("currentUserId") Long currentUserId,
+                      @Param("isAdmin") boolean isAdmin);
 
-    /**
-     * 分页查询。orderColumn / orderDirection 仅允许服务端白名单映射，禁止前端直接拼 SQL。
-     */
-    List<Experiment> selectPage(
-            @Param("name") String name,
-            @Param("orderColumn") String orderColumn,
-            @Param("orderDirection") String orderDirection,
-            @Param("offset") int offset,
-            @Param("limit") int limit);
+    List<Experiment> selectVisiblePage(@Param("name") String name,
+                                       @Param("status") String status,
+                                       @Param("currentUserId") Long currentUserId,
+                                       @Param("isAdmin") boolean isAdmin,
+                                       @Param("orderColumn") String orderColumn,
+                                       @Param("orderDirection") String orderDirection,
+                                       @Param("offset") int offset,
+                                       @Param("limit") int limit);
 
-    /** 按主键查询 */
     Experiment selectById(Long id);
 
-    /** 新增 */
     int insert(Experiment experiment);
 
-    /** 按主键更新 */
     int updateById(Experiment experiment);
 
-    /** 按主键删除 */
+    int updateStatus(@Param("id") Long id,
+                     @Param("status") String status,
+                     @Param("reviewedBy") Long reviewedBy,
+                     @Param("reviewComment") String reviewComment);
+
     int deleteById(Long id);
 }

@@ -11,36 +11,53 @@
         <result column="chemical_name"  property="chemicalName"/>
         <result column="indicator_name" property="indicatorName"/>
         <result column="description"    property="description"/>
+        <result column="status"         property="status"/>
+        <result column="submitted_by"   property="submittedBy"/>
+        <result column="reviewed_by"    property="reviewedBy"/>
+        <result column="reviewed_time"  property="reviewedTime"/>
+        <result column="review_comment" property="reviewComment"/>
         <result column="created_time"   property="createdTime"/>
         <result column="updated_time"   property="updatedTime"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, name, animal_type, chemical_name, indicator_name, description, created_time, updated_time
+        id, name, animal_type, chemical_name, indicator_name, description,
+        status, submitted_by, reviewed_by, reviewed_time, review_comment,
+        created_time, updated_time
     </sql>
 
-    <sql id="Where_Name">
+    <sql id="Where_Visible">
         <where>
             <if test="name != null and name != ''">
                 AND name LIKE CONCAT('%', #{name}, '%')
             </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+            <choose>
+                <when test="isAdmin">
+                </when>
+                <otherwise>
+                    AND (status = 'APPROVED' OR submitted_by = #{currentUserId})
+                </otherwise>
+            </choose>
         </where>
     </sql>
 
-    <select id="countByName" resultType="long">
+    <select id="countVisible" resultType="long">
         SELECT COUNT(*)
         FROM experiment
-        <include refid="Where_Name"/>
+        <include refid="Where_Visible"/>
     </select>
 
-    <!-- orderColumn / orderDirection 由 Service 白名单校验后传入 -->
-    <select id="selectPage" resultMap="BaseResultMap">
+    <select id="selectVisiblePage" resultMap="BaseResultMap">
         SELECT <include refid="Base_Column_List"/>
         FROM experiment
-        <include refid="Where_Name"/>
+        <include refid="Where_Visible"/>
         ORDER BY
         <choose>
             <when test="orderColumn == 'created_time'">created_time</when>
+            <when test="orderColumn == 'updated_time'">updated_time</when>
             <otherwise>id</otherwise>
         </choose>
         <choose>
@@ -57,8 +74,14 @@
     </select>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO experiment (name, animal_type, chemical_name, indicator_name, description)
-        VALUES (#{name}, #{animalType}, #{chemicalName}, #{indicatorName}, #{description})
+        INSERT INTO experiment (
+            name, animal_type, chemical_name, indicator_name, description,
+            status, submitted_by, reviewed_by, reviewed_time, review_comment
+        )
+        VALUES (
+            #{name}, #{animalType}, #{chemicalName}, #{indicatorName}, #{description},
+            #{status}, #{submittedBy}, #{reviewedBy}, #{reviewedTime}, #{reviewComment}
+        )
     </insert>
 
     <update id="updateById">
@@ -69,7 +92,21 @@
             <if test="chemicalName != null and chemicalName != ''">chemical_name = #{chemicalName},</if>
             <if test="indicatorName != null and indicatorName != ''">indicator_name = #{indicatorName},</if>
             <if test="description != null">description = #{description},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+            <if test="submittedBy != null">submitted_by = #{submittedBy},</if>
+            reviewed_by = #{reviewedBy},
+            reviewed_time = #{reviewedTime},
+            review_comment = #{reviewComment}
         </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateStatus">
+        UPDATE experiment
+        SET status = #{status},
+            reviewed_by = #{reviewedBy},
+            reviewed_time = CURRENT_TIMESTAMP,
+            review_comment = #{reviewComment}
         WHERE id = #{id}
     </update>
 

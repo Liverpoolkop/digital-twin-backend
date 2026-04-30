@@ -1,16 +1,10 @@
 package com.example.digitaltwin.dto;
 
-import lombok.Data;
-
 /**
  * 仿真接口请求体
  * POST /api/simulation/run
  */
-@Data
 public class SimulationRequest {
-
-    /** 操作人 ID（关联 user 表）*/
-    private Long userId;
 
     /** 关联实验方案 ID（可选，从实验台账发起仿真时传入） */
     private Long experimentId;
@@ -40,4 +34,68 @@ public class SimulationRequest {
 
     /** 目标预测剂量（与 dataset_raw.dosage 单位一致） */
     private Double targetDosage;
+
+    public Long getExperimentId() {
+        return experimentId;
+    }
+
+    public void setExperimentId(Long experimentId) {
+        this.experimentId = experimentId;
+    }
+
+    public String getAnimalType() {
+        return animalType;
+    }
+
+    public void setAnimalType(String animalType) {
+        this.animalType = animalType;
+    }
+
+    public String getChemicalName() {
+        return chemicalName;
+    }
+
+    public void setChemicalName(String chemicalName) {
+        this.chemicalName = chemicalName;
+    }
+
+    public String getIndicatorName() {
+        return indicatorName;
+    }
+
+    public void setIndicatorName(String indicatorName) {
+        this.indicatorName = indicatorName;
+    }
+
+    public Double getMinTemp() {
+        return minTemp;
+    }
+
+    public void setMinTemp(Double minTemp) {
+        this.minTemp = minTemp;
+    }
+
+    public Double getMaxTemp() {
+        return maxTemp;
+    }
+
+    public void setMaxTemp(Double maxTemp) {
+        this.maxTemp = maxTemp;
+    }
+
+    public String getAlgorithmModel() {
+        return algorithmModel;
+    }
+
+    public void setAlgorithmModel(String algorithmModel) {
+        this.algorithmModel = algorithmModel;
+    }
+
+    public Double getTargetDosage() {
+        return targetDosage;
+    }
+
+    public void setTargetDosage(Double targetDosage) {
+        this.targetDosage = targetDosage;
+    }
 }

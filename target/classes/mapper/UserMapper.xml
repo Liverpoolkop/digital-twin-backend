@@ -9,22 +9,67 @@
         <result column="username"     property="username"/>
         <result column="password"     property="password"/>
         <result column="nickname"     property="nickname"/>
+        <result column="role"         property="role"/>
+        <result column="status"       property="status"/>
         <result column="created_time" property="createdTime"/>
     </resultMap>
 
+    <sql id="UserColumns">
+        id, username, password, nickname, role, status, created_time
+    </sql>
+
     <select id="findByUsername" resultMap="UserMap">
-        SELECT id, username, password, nickname, created_time
+        SELECT <include refid="UserColumns"/>
         FROM `user`
         WHERE username = #{username}
     </select>
 
+    <select id="findById" resultMap="UserMap">
+        SELECT <include refid="UserColumns"/>
+        FROM `user`
+        WHERE id = #{id}
+    </select>
+
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO `user` (username, password, nickname)
-        VALUES (#{username}, #{password}, #{nickname})
+        INSERT INTO `user` (username, password, nickname, role, status)
+        VALUES (#{username}, #{password}, #{nickname}, #{role}, #{status})
     </insert>
 
     <select id="countByUsername" resultType="int">
         SELECT COUNT(*) FROM `user` WHERE username = #{username}
+    </select>
+
+    <select id="selectUsers" resultMap="UserMap">
+        SELECT <include refid="UserColumns"/>
+        FROM `user`
+        <where>
+            <if test="username != null and username != ''">
+                AND username LIKE CONCAT('%', #{username}, '%')
+            </if>
+            <if test="role != null and role != ''">
+                AND role = #{role}
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+        </where>
+        ORDER BY id DESC
+    </select>
+
+    <update id="updateRole">
+        UPDATE `user`
+        SET role = #{role}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateStatus">
+        UPDATE `user`
+        SET status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <select id="countAll" resultType="long">
+        SELECT COUNT(*) FROM `user`
     </select>
 
 </mapper>

@@ -15,10 +15,20 @@
         <result column="create_time"     property="createTime"/>
     </resultMap>
 
-    <!--
-        训练集查询：精确匹配物种 + 化学物质 + 指标名称 + 温度区间
-        指标名称过滤确保同类量纲数据进行回归，不混用 ALT 与刺激评分等不同指标
-    -->
+    <sql id="AdminWhere">
+        <where>
+            <if test="animalType != null and animalType != ''">
+                AND animal_type = #{animalType}
+            </if>
+            <if test="chemicalName != null and chemicalName != ''">
+                AND chemical_name LIKE CONCAT('%', #{chemicalName}, '%')
+            </if>
+            <if test="indicatorName != null and indicatorName != ''">
+                AND indicator_name LIKE CONCAT('%', #{indicatorName}, '%')
+            </if>
+        </where>
+    </sql>
+
     <select id="selectTrainingData" resultMap="DatasetRawMap">
         SELECT id, animal_type, chemical_name, dosage,
                indicator_name, indicator_value, temperature, create_time
@@ -29,5 +39,52 @@
           AND temperature BETWEEN #{minTemp} AND #{maxTemp}
         ORDER BY dosage ASC
     </select>
+
+    <select id="countAll" resultType="long">
+        SELECT COUNT(*)
+        FROM dataset_raw
+        <include refid="AdminWhere"/>
+    </select>
+
+    <select id="selectPage" resultMap="DatasetRawMap">
+        SELECT id, animal_type, chemical_name, dosage,
+               indicator_name, indicator_value, temperature, create_time
+        FROM dataset_raw
+        <include refid="AdminWhere"/>
+        ORDER BY id DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="selectById" resultMap="DatasetRawMap">
+        SELECT id, animal_type, chemical_name, dosage,
+               indicator_name, indicator_value, temperature, create_time
+        FROM dataset_raw
+        WHERE id = #{id}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO dataset_raw (
+            animal_type, chemical_name, dosage, indicator_name, indicator_value, temperature
+        ) VALUES (
+            #{animalType}, #{chemicalName}, #{dosage}, #{indicatorName}, #{indicatorValue}, #{temperature}
+        )
+    </insert>
+
+    <update id="updateById">
+        UPDATE dataset_raw
+        <set>
+            <if test="animalType != null and animalType != ''">animal_type = #{animalType},</if>
+            <if test="chemicalName != null and chemicalName != ''">chemical_name = #{chemicalName},</if>
+            <if test="dosage != null">dosage = #{dosage},</if>
+            <if test="indicatorName != null and indicatorName != ''">indicator_name = #{indicatorName},</if>
+            <if test="indicatorValue != null">indicator_value = #{indicatorValue},</if>
+            <if test="temperature != null">temperature = #{temperature},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM dataset_raw WHERE id = #{id}
+    </delete>
 
 </mapper>

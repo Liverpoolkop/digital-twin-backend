@@ -1,6 +1,5 @@
 package com.example.digitaltwin.entity;
 
-import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -8,7 +7,6 @@ import java.time.LocalDateTime;
  * 用户数字孪生仿真预测记录
  * 对应表：simulation_record
  */
-@Data
 public class SimulationRecord {
 
     /** 主键 */
@@ -45,4 +43,84 @@ public class SimulationRecord {
 
     /** 记录创建时间 */
     private LocalDateTime createTime;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public Long getExperimentId() {
+        return experimentId;
+    }
+
+    public void setExperimentId(Long experimentId) {
+        this.experimentId = experimentId;
+    }
+
+    public String getTargetAnimal() {
+        return targetAnimal;
+    }
+
+    public void setTargetAnimal(String targetAnimal) {
+        this.targetAnimal = targetAnimal;
+    }
+
+    public String getTargetChemical() {
+        return targetChemical;
+    }
+
+    public void setTargetChemical(String targetChemical) {
+        this.targetChemical = targetChemical;
+    }
+
+    public String getIndicatorName() {
+        return indicatorName;
+    }
+
+    public void setIndicatorName(String indicatorName) {
+        this.indicatorName = indicatorName;
+    }
+
+    public BigDecimal getInputDosage() {
+        return inputDosage;
+    }
+
+    public void setInputDosage(BigDecimal inputDosage) {
+        this.inputDosage = inputDosage;
+    }
+
+    public String getSelectedModel() {
+        return selectedModel;
+    }
+
+    public void setSelectedModel(String selectedModel) {
+        this.selectedModel = selectedModel;
+    }
+
+    public BigDecimal getPredictedValue() {
+        return predictedValue;
+    }
+
+    public void setPredictedValue(BigDecimal predictedValue) {
+        this.predictedValue = predictedValue;
+    }
+
+    public LocalDateTime getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(LocalDateTime createTime) {
+        this.createTime = createTime;
+    }
 }

@@ -1,6 +1,5 @@
 package com.example.digitaltwin.entity;
 
-import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -8,7 +7,6 @@ import java.time.LocalDateTime;
  * 历史原始实验数据（算法训练语料）
  * 对应表：dataset_raw
  */
-@Data
 public class DatasetRaw {
 
     /** 主键 */
@@ -34,4 +32,68 @@ public class DatasetRaw {
 
     /** 样本入库时间 */
     private LocalDateTime createTime;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getAnimalType() {
+        return animalType;
+    }
+
+    public void setAnimalType(String animalType) {
+        this.animalType = animalType;
+    }
+
+    public String getChemicalName() {
+        return chemicalName;
+    }
+
+    public void setChemicalName(String chemicalName) {
+        this.chemicalName = chemicalName;
+    }
+
+    public BigDecimal getDosage() {
+        return dosage;
+    }
+
+    public void setDosage(BigDecimal dosage) {
+        this.dosage = dosage;
+    }
+
+    public String getIndicatorName() {
+        return indicatorName;
+    }
+
+    public void setIndicatorName(String indicatorName) {
+        this.indicatorName = indicatorName;
+    }
+
+    public BigDecimal getIndicatorValue() {
+        return indicatorValue;
+    }
+
+    public void setIndicatorValue(BigDecimal indicatorValue) {
+        this.indicatorValue = indicatorValue;
+    }
+
+    public BigDecimal getTemperature() {
+        return temperature;
+    }
+
+    public void setTemperature(BigDecimal temperature) {
+        this.temperature = temperature;
+    }
+
+    public LocalDateTime getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(LocalDateTime createTime) {
+        this.createTime = createTime;
+    }
 }

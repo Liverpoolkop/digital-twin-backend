@@ -14,12 +14,14 @@ CREATE TABLE `user` (
     username     VARCHAR(50) NOT NULL UNIQUE          COMMENT '登录账号',
     password     VARCHAR(100) NOT NULL                COMMENT 'BCrypt 加密密码',
     nickname     VARCHAR(50)                          COMMENT '昵称',
+    role         VARCHAR(20) NOT NULL DEFAULT 'USER'  COMMENT '角色：ADMIN / USER',
+    status       VARCHAR(20) NOT NULL DEFAULT 'ACTIVE' COMMENT '状态：ACTIVE / DISABLED',
     created_time DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '注册时间',
     PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户表';
 
--- ─── 实验方案台账 ────────────────────────────────────────
--- 不含实物实验阶段状态；indicator_name 与 dataset_raw 中的值一致
+-- ─── 实验方案台账 / 申请单 ────────────────────────────────────────
+-- 用户可创建草稿并提交审批；审批通过后可作为正式实验方案使用
 CREATE TABLE experiment (
     id             BIGINT       NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     name           VARCHAR(100) NOT NULL                COMMENT '方案名称',
@@ -27,10 +29,17 @@ CREATE TABLE experiment (
     chemical_name  VARCHAR(100) NOT NULL                COMMENT '化学物质',
     indicator_name VARCHAR(100) NOT NULL                COMMENT '观测指标名称（与 dataset_raw 一致）',
     description    TEXT                                 COMMENT '方案说明',
+    status         VARCHAR(20)  NOT NULL DEFAULT 'DRAFT' COMMENT '状态：DRAFT / PENDING / APPROVED / REJECTED',
+    submitted_by   BIGINT       NULL                    COMMENT '提交人 user.id',
+    reviewed_by    BIGINT       NULL                    COMMENT '审批人 user.id',
+    reviewed_time  DATETIME     NULL                    COMMENT '审批时间',
+    review_comment VARCHAR(255) NULL                    COMMENT '审批意见',
     created_time   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_time   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    PRIMARY KEY (id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='实验方案台账';
+    PRIMARY KEY (id),
+    KEY idx_experiment_status (status),
+    KEY idx_experiment_submitter (submitted_by)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='实验方案台账/申请单';
 
 -- ─── 历史原始数据表（训练语料）────────────────────────────
 CREATE TABLE dataset_raw (
@@ -69,10 +78,10 @@ CREATE TABLE simulation_record (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='仿真预测记录';
 
 -- ─── 示例：实验方案 ───────────────────────────────────────
-INSERT INTO experiment (name, animal_type, chemical_name, indicator_name, description) VALUES
-('小鼠乙醇肝毒性初筛方案', 'MOUSE',  '乙醇',         '血清ALT(U/L)',  '基于历史 ALT 数据的数字孪生初筛'),
-('兔角膜丙酮刺激评估方案', 'RABBIT', '丙酮',         '角膜刺激评分',  '角膜刺激评分数字孪生映射'),
-('蛙皮肤 SDS 反应方案',    'FROG',   '十二烷基硫酸钠', '皮肤反应指数', '皮肤反应指数模拟');
+INSERT INTO experiment (name, animal_type, chemical_name, indicator_name, description, status) VALUES
+('小鼠乙醇肝毒性初筛方案', 'MOUSE',  '乙醇',         '血清ALT(U/L)',  '基于历史 ALT 数据的数字孪生初筛', 'APPROVED'),
+('兔角膜丙酮刺激评估方案', 'RABBIT', '丙酮',         '角膜刺激评分',  '角膜刺激评分数字孪生映射', 'APPROVED'),
+('蛙皮肤 SDS 反应方案',    'FROG',   '十二烷基硫酸钠', '皮肤反应指数', '皮肤反应指数模拟', 'APPROVED');
 
 -- ─── 训练语料（历史原始数据）────────────────────────────────
 -- 设计说明（教学/原型用，数值在合理医学量级内，并体现剂量–反应关系）：
