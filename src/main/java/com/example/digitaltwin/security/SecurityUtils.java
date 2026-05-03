@@ -13,15 +13,23 @@ public final class SecurityUtils {
     }
 
     public static AuthenticatedUser getCurrentUser() {
+        AuthenticatedUser user = getCurrentUserOrNull();
+        if (user == null) {
+            throw new IllegalStateException("当前未登录");
+        }
+        return user;
+    }
+
+    public static AuthenticatedUser getCurrentUserOrNull() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null) {
-            throw new IllegalStateException("当前未登录");
+            return null;
         }
         Object principal = authentication.getPrincipal();
         if (principal instanceof AuthenticatedUser user) {
             return user;
         }
-        throw new IllegalStateException("无法识别当前登录用户");
+        return null;
     }
 
     public static boolean isAdmin() {

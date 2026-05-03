@@ -3,6 +3,8 @@
 
 USE digital_twin_db;
 
+DROP TABLE IF EXISTS sys_comment_like;
+DROP TABLE IF EXISTS sys_comment;
 DROP TABLE IF EXISTS simulation_record;
 DROP TABLE IF EXISTS dataset_raw;
 DROP TABLE IF EXISTS experiment;
@@ -76,6 +78,55 @@ CREATE TABLE simulation_record (
     CONSTRAINT fk_simulation_experiment FOREIGN KEY (experiment_id) REFERENCES experiment (id)
         ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='仿真预测记录';
+
+-- ─── 平台评论表 ──────────────────────────────────────────
+CREATE TABLE sys_comment (
+    id                 BIGINT       NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    user_id            BIGINT       NOT NULL                COMMENT '评论用户ID，关联 user.id',
+    experiment_id      BIGINT       NULL                    COMMENT '关联实验ID，可为空',
+    root_id            BIGINT       NULL                    COMMENT '根评论ID；主评论为空，回复指向所属主评论',
+    parent_id          BIGINT       NULL                    COMMENT '父评论ID；主评论为空，回复指向直接父评论',
+    reply_to_user_id   BIGINT       NULL                    COMMENT '被回复用户ID，可为空',
+    content            VARCHAR(1000) NOT NULL              COMMENT '评论内容（纯文本）',
+    like_count         INT          NOT NULL DEFAULT 0      COMMENT '点赞数',
+    status             VARCHAR(20)  NOT NULL DEFAULT 'PENDING' COMMENT '审核状态：PENDING / APPROVED / REJECTED',
+    reject_reason      VARCHAR(255) NULL                    COMMENT '驳回原因/审核备注',
+    reviewed_by        BIGINT       NULL                    COMMENT '审核人 user.id',
+    reviewed_time      DATETIME     NULL                    COMMENT '审核时间',
+    create_time        DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time        DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (id),
+    KEY idx_comment_status_time (status, create_time),
+    KEY idx_comment_user_time (user_id, create_time),
+    KEY idx_comment_experiment (experiment_id),
+    KEY idx_comment_root (root_id),
+    KEY idx_comment_parent (parent_id),
+    CONSTRAINT fk_comment_user FOREIGN KEY (user_id) REFERENCES `user` (id)
+        ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT fk_comment_experiment FOREIGN KEY (experiment_id) REFERENCES experiment (id)
+        ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_comment_root FOREIGN KEY (root_id) REFERENCES sys_comment (id)
+        ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_comment_parent FOREIGN KEY (parent_id) REFERENCES sys_comment (id)
+        ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_comment_reply_to_user FOREIGN KEY (reply_to_user_id) REFERENCES `user` (id)
+        ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT fk_comment_reviewed_by FOREIGN KEY (reviewed_by) REFERENCES `user` (id)
+        ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='平台评论表';
+
+-- ─── 评论点赞记录表 ────────────────────────────────────────
+CREATE TABLE sys_comment_like (
+    comment_id    BIGINT   NOT NULL COMMENT '评论ID',
+    user_id       BIGINT   NOT NULL COMMENT '点赞用户ID',
+    create_time   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '点赞时间',
+    PRIMARY KEY (comment_id, user_id),
+    KEY idx_comment_like_user (user_id),
+    CONSTRAINT fk_comment_like_comment FOREIGN KEY (comment_id) REFERENCES sys_comment (id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_comment_like_user FOREIGN KEY (user_id) REFERENCES `user` (id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='评论点赞记录表';
 
 -- ─── 示例：实验方案 ───────────────────────────────────────
 INSERT INTO experiment (name, animal_type, chemical_name, indicator_name, description, status) VALUES

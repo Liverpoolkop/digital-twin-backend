@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(npm run *)",
-      "Bash(npm --prefix \"d:\\\\Cursor_workshop\\\\frontend\" run build)"
+      "Bash(npm --prefix \"d:\\\\Cursor_workshop\\\\frontend\" run build)",
+      "Bash(mvn -f \"d:\\\\Cursor_workshop\\\\backend_server\\\\pom.xml\" -q -DskipTests compile)"
     ]
   }
 }

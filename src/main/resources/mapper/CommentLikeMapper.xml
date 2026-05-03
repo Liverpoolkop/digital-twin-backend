@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.digitaltwin.mapper.CommentLikeMapper">
+
+    <insert id="insert">
+        INSERT INTO sys_comment_like (comment_id, user_id)
+        VALUES (#{commentId}, #{userId})
+    </insert>
+
+    <delete id="delete">
+        DELETE FROM sys_comment_like
+        WHERE comment_id = #{commentId} AND user_id = #{userId}
+    </delete>
+
+    <select id="exists" resultType="int">
+        SELECT COUNT(*)
+        FROM sys_comment_like
+        WHERE comment_id = #{commentId} AND user_id = #{userId}
+    </select>
+
+</mapper>

@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.digitaltwin.mapper.CommentMapper">
+
+    <resultMap id="CommentMap" type="Comment">
+        <id     column="id"                  property="id"/>
+        <result column="user_id"             property="userId"/>
+        <result column="experiment_id"       property="experimentId"/>
+        <result column="root_id"             property="rootId"/>
+        <result column="parent_id"           property="parentId"/>
+        <result column="reply_to_user_id"    property="replyToUserId"/>
+        <result column="content"             property="content"/>
+        <result column="like_count"          property="likeCount"/>
+        <result column="status"              property="status"/>
+        <result column="reject_reason"       property="rejectReason"/>
+        <result column="reviewed_by"         property="reviewedBy"/>
+        <result column="reviewed_time"       property="reviewedTime"/>
+        <result column="create_time"         property="createTime"/>
+        <result column="update_time"         property="updateTime"/>
+        <result column="nickname"            property="nickname"/>
+        <result column="reply_to_nickname"   property="replyToNickname"/>
+        <result column="liked_by_current_user" property="likedByCurrentUser"/>
+        <result column="owned_by_current_user" property="ownedByCurrentUser"/>
+    </resultMap>
+
+    <sql id="BaseColumns">
+        c.id, c.user_id, c.experiment_id, c.root_id, c.parent_id, c.reply_to_user_id,
+        c.content, c.like_count, c.status, c.reject_reason, c.reviewed_by, c.reviewed_time,
+        c.create_time, c.update_time,
+        u.nickname AS nickname,
+        ru.nickname AS reply_to_nickname
+    </sql>
+
+    <sql id="JoinUsers">
+        FROM sys_comment c
+        INNER JOIN `user` u ON u.id = c.user_id
+        LEFT JOIN `user` ru ON ru.id = c.reply_to_user_id
+    </sql>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_comment (
+            user_id, experiment_id, root_id, parent_id, reply_to_user_id,
+            content, like_count, status, reject_reason, reviewed_by, reviewed_time
+        ) VALUES (
+            #{userId}, #{experimentId}, #{rootId}, #{parentId}, #{replyToUserId},
+            #{content}, #{likeCount}, #{status}, #{rejectReason}, #{reviewedBy}, #{reviewedTime}
+        )
+    </insert>
+
+    <select id="selectById" resultMap="CommentMap">
+        SELECT <include refid="BaseColumns"/>,
+               FALSE AS liked_by_current_user,
+               FALSE AS owned_by_current_user
+        <include refid="JoinUsers"/>
+        WHERE c.id = #{id}
+    </select>
+
+    <select id="selectPublicTreeCandidates" resultMap="CommentMap">
+        SELECT <include refid="BaseColumns"/>,
+               FALSE AS liked_by_current_user,
+               FALSE AS owned_by_current_user
+        <include refid="JoinUsers"/>
+        WHERE c.status = 'APPROVED'
+        <if test="experimentId != null">
+            AND c.experiment_id = #{experimentId}
+        </if>
+        ORDER BY c.create_time DESC
+        <if test="limit != null and limit > 0">
+            LIMIT #{limit}
+        </if>
+    </select>
+
+    <select id="selectVisibleForCurrentUser" resultMap="CommentMap">
+        SELECT <include refid="BaseColumns"/>,
+               CASE WHEN cl.user_id IS NULL THEN FALSE ELSE TRUE END AS liked_by_current_user,
+               CASE WHEN c.user_id = #{currentUserId} THEN TRUE ELSE FALSE END AS owned_by_current_user
+        <include refid="JoinUsers"/>
+        LEFT JOIN sys_comment_like cl
+               ON cl.comment_id = c.id AND cl.user_id = #{currentUserId}
+        WHERE c.status = 'APPROVED'
+           OR c.user_id = #{currentUserId}
+        <if test="experimentId != null">
+            AND c.experiment_id = #{experimentId}
+        </if>
+        ORDER BY c.create_time DESC
+    </select>
+
+    <select id="selectRecentApproved" resultMap="CommentMap">
+        SELECT <include refid="BaseColumns"/>,
+               FALSE AS liked_by_current_user,
+               FALSE AS owned_by_current_user
+        <include refid="JoinUsers"/>
+        WHERE c.status = 'APPROVED'
+        ORDER BY c.create_time DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="countPending" resultType="long">
+        SELECT COUNT(*)
+        FROM sys_comment c
+        <where>
+            c.status = 'PENDING'
+            <if test="keyword != null and keyword != ''">
+                AND c.content LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="experimentId != null">
+                AND c.experiment_id = #{experimentId}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectPendingPage" resultMap="CommentMap">
+        SELECT <include refid="BaseColumns"/>,
+               FALSE AS liked_by_current_user,
+               FALSE AS owned_by_current_user
+        <include refid="JoinUsers"/>
+        <where>
+            c.status = 'PENDING'
+            <if test="keyword != null and keyword != ''">
+                AND c.content LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="experimentId != null">
+                AND c.experiment_id = #{experimentId}
+            </if>
+        </where>
+        ORDER BY c.create_time DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <update id="updateAudit">
+        UPDATE sys_comment
+        SET status = #{status},
+            reject_reason = #{reviewComment},
+            reviewed_by = #{reviewedBy},
+            reviewed_time = CURRENT_TIMESTAMP
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateLikeCountDelta">
+        UPDATE sys_comment
+        SET like_count = CASE
+            WHEN like_count + #{delta} &lt; 0 THEN 0
+            ELSE like_count + #{delta}
+        END
+        WHERE id = #{id}
+    </update>
+
+</mapper>
