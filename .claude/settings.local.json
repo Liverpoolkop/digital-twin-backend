@@ -3,7 +3,21 @@
     "allow": [
       "Bash(npm run *)",
       "Bash(npm --prefix \"d:\\\\Cursor_workshop\\\\frontend\" run build)",
-      "Bash(mvn -f \"d:\\\\Cursor_workshop\\\\backend_server\\\\pom.xml\" -q -DskipTests compile)"
+      "Bash(mvn -f \"d:\\\\Cursor_workshop\\\\backend_server\\\\pom.xml\" -q -DskipTests compile)",
+      "Read(//mnt/d/Cursor_workshop/**)",
+      "Bash(mvn clean *)",
+      "Bash(mvn dependency:tree)",
+      "Bash(cd /tmp)",
+      "Bash(jar -xf /c/Users/lpsis/.m2/repository/com/volcengine/volcengine-java-sdk-ark-runtime/0.1.151/volcengine-java-sdk-ark-runtime-0.1.151.jar)",
+      "Bash(javap -cp /c/Users/lpsis/.m2/repository/com/volcengine/volcengine-java-sdk-ark-runtime/0.1.151/volcengine-java-sdk-ark-runtime-0.1.151.jar com.volcengine.ark.runtime.model.responses.response.ResponseObject)",
+      "Bash(jar -tf /c/Users/lpsis/.m2/repository/com/volcengine/volcengine-java-sdk-ark-runtime/0.1.151/volcengine-java-sdk-ark-runtime-0.1.151.jar)",
+      "Bash(grep \"\\\\.class$\")",
+      "Bash(grep -v \"\\\\$\")",
+      "Bash(javap -cp /c/Users/lpsis/.m2/repository/com/volcengine/volcengine-java-sdk-ark-runtime/0.1.151/volcengine-java-sdk-ark-runtime-0.1.151.jar com.volcengine.ark.runtime.service.ArkService)",
+      "Bash(javap -cp /c/Users/lpsis/.m2/repository/com/volcengine/volcengine-java-sdk-ark-runtime/0.1.151/volcengine-java-sdk-ark-runtime-0.1.151.jar com.volcengine.ark.runtime.model.completion.chat.ChatCompletionResult)",
+      "Bash(javap -cp /c/Users/lpsis/.m2/repository/com/volcengine/volcengine-java-sdk-ark-runtime/0.1.151/volcengine-java-sdk-ark-runtime-0.1.151.jar com.volcengine.ark.runtime.model.completion.chat.ChatCompletionChoice)",
+      "Bash(javap -cp /c/Users/lpsis/.m2/repository/com/volcengine/volcengine-java-sdk-ark-runtime/0.1.151/volcengine-java-sdk-ark-runtime-0.1.151.jar com.volcengine.ark.runtime.model.completion.chat.ChatMessage)",
+      "Bash(javap -cp /c/Users/lpsis/.m2/repository/com/volcengine/volcengine-java-sdk-ark-runtime/0.1.151/volcengine-java-sdk-ark-runtime-0.1.151.jar 'com.volcengine.ark.runtime.service.ArkService$Builder')"
     ]
   }
 }

@@ -18,3 +18,15 @@ mybatis:
   configuration:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# AI预测配置（字节跳动 Doubao 模型）
+ai:
+  prediction:
+    enabled: true
+    provider: doubao
+    api-key: 9b681730-e1d9-4105-a34b-3f201efb75a8
+    base-url: https://ark.cn-beijing.volces.com/api/v3
+    model: ep-m-20260115094601-4lxsl
+    timeout: 90000
+    max-retries: 2
+    context-size: 15

@@ -1,0 +1,40 @@
+# AI预测配置示例
+# 使用时请复制到 application.yml 中
+
+ai:
+  prediction:
+    # 是否启用AI预测（默认false，避免未配置时报错）
+    enabled: false
+
+    # AI提供商：deepseek | openai
+    provider: deepseek
+
+    # API密钥（建议使用环境变量）
+    api-key: ${AI_API_KEY:your-api-key-here}
+
+    # API基础URL
+    base-url: https://api.deepseek.com/v1
+
+    # 模型名称
+    model: deepseek-chat
+
+    # 超时时间（毫秒）
+    timeout: 30000
+
+    # 最大重试次数
+    max-retries: 2
+
+    # 上下文历史数据条数
+    context-size: 15
+
+# 使用OpenAI的配置示例：
+# ai:
+#   prediction:
+#     enabled: true
+#     provider: openai
+#     api-key: ${OPENAI_API_KEY}
+#     base-url: https://api.openai.com/v1
+#     model: gpt-4
+#     timeout: 30000
+#     max-retries: 2
+#     context-size: 15

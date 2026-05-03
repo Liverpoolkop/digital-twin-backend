@@ -16,6 +16,15 @@ public interface DatasetRawMapper {
                                         @Param("minTemp") BigDecimal minTemp,
                                         @Param("maxTemp") BigDecimal maxTemp);
 
+    /**
+     * 多器官查询训练数据（新增organ条件）
+     */
+    List<DatasetRaw> selectByMultiOrganConditions(@Param("animalType") String animalType,
+                                                   @Param("chemicalName") String chemicalName,
+                                                   @Param("organ") String organ,
+                                                   @Param("indicatorName") String indicatorName,
+                                                   @Param("targetDosage") Double targetDosage);
+
     long countAll(@Param("animalType") String animalType,
                   @Param("chemicalName") String chemicalName,
                   @Param("indicatorName") String indicatorName);

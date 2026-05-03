@@ -1,6 +1,7 @@
 package com.example.digitaltwin.config;
 
-import com.example.digitaltwin.security.JwtAuthenticationFilter;
+import java.nio.charset.StandardCharsets;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -11,7 +12,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import java.nio.charset.StandardCharsets;
+import com.example.digitaltwin.security.JwtAuthenticationFilter;
 
 @Configuration
 public class SecurityConfig {
@@ -43,7 +44,8 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/auth/**").permitAll()
+                        // 在你的 SecurityConfig 中找到 requestMatchers
+                        .requestMatchers("/api/auth/**", "/error").permitAll() // 把 "/error" 加进去
                         .requestMatchers(HttpMethod.GET, "/api/comments/public", "/api/comments/recent").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()

@@ -8,6 +8,7 @@
         <id     column="id"              property="id"/>
         <result column="animal_type"     property="animalType"/>
         <result column="chemical_name"   property="chemicalName"/>
+        <result column="organ"           property="organ"/>
         <result column="dosage"          property="dosage"/>
         <result column="indicator_name"  property="indicatorName"/>
         <result column="indicator_value" property="indicatorValue"/>
@@ -37,6 +38,17 @@
           AND chemical_name  = #{chemicalName}
           AND indicator_name = #{indicatorName}
           AND temperature BETWEEN #{minTemp} AND #{maxTemp}
+        ORDER BY dosage ASC
+    </select>
+
+    <select id="selectByMultiOrganConditions" resultMap="DatasetRawMap">
+        SELECT id, animal_type, chemical_name, organ, dosage,
+               indicator_name, indicator_value, temperature, create_time
+        FROM dataset_raw
+        WHERE animal_type    = #{animalType}
+          AND chemical_name  = #{chemicalName}
+          AND organ          = #{organ}
+          AND indicator_name = #{indicatorName}
         ORDER BY dosage ASC
     </select>
 

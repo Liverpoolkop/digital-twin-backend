@@ -25,19 +25,21 @@ CREATE TABLE `user` (
 -- ─── 实验方案台账 / 申请单 ────────────────────────────────────────
 -- 用户可创建草稿并提交审批；审批通过后可作为正式实验方案使用
 CREATE TABLE experiment (
-    id             BIGINT       NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-    name           VARCHAR(100) NOT NULL                COMMENT '方案名称',
-    animal_type    ENUM('MOUSE','RABBIT','FROG') NOT NULL COMMENT '实验动物',
-    chemical_name  VARCHAR(100) NOT NULL                COMMENT '化学物质',
-    indicator_name VARCHAR(100) NOT NULL                COMMENT '观测指标名称（与 dataset_raw 一致）',
-    description    TEXT                                 COMMENT '方案说明',
-    status         VARCHAR(20)  NOT NULL DEFAULT 'DRAFT' COMMENT '状态：DRAFT / PENDING / APPROVED / REJECTED',
-    submitted_by   BIGINT       NULL                    COMMENT '提交人 user.id',
-    reviewed_by    BIGINT       NULL                    COMMENT '审批人 user.id',
-    reviewed_time  DATETIME     NULL                    COMMENT '审批时间',
-    review_comment VARCHAR(255) NULL                    COMMENT '审批意见',
-    created_time   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    updated_time   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    id              BIGINT       NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    name            VARCHAR(100) NOT NULL                COMMENT '方案名称',
+    animal_type     ENUM('MOUSE','RABBIT','FROG') NOT NULL COMMENT '实验动物',
+    chemical_name   VARCHAR(100) NOT NULL                COMMENT '化学物质',
+    simulation_mode VARCHAR(20)  NOT NULL DEFAULT 'SINGLE' COMMENT '仿真模式：SINGLE / MULTI_ORGAN',
+    indicator_name  VARCHAR(100) NULL                    COMMENT '观测指标名称（单指标模式必填）',
+    target_organs   VARCHAR(200) NULL                    COMMENT '目标器官（多器官模式必填，逗号分隔：Heart,Liver,Lung）',
+    description     TEXT                                 COMMENT '方案说明',
+    status          VARCHAR(20)  NOT NULL DEFAULT 'DRAFT' COMMENT '状态：DRAFT / PENDING / APPROVED / REJECTED',
+    submitted_by    BIGINT       NULL                    COMMENT '提交人 user.id',
+    reviewed_by     BIGINT       NULL                    COMMENT '审批人 user.id',
+    reviewed_time   DATETIME     NULL                    COMMENT '审批时间',
+    review_comment  VARCHAR(255) NULL                    COMMENT '审批意见',
+    created_time    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_time    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (id),
     KEY idx_experiment_status (status),
     KEY idx_experiment_submitter (submitted_by)
@@ -48,6 +50,7 @@ CREATE TABLE dataset_raw (
     id               BIGINT         NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     animal_type      ENUM('MOUSE','RABBIT','FROG') NOT NULL COMMENT '物种',
     chemical_name    VARCHAR(200)   NOT NULL                COMMENT '化学物质',
+    organ            VARCHAR(50)    NULL                    COMMENT '器官：Heart/Liver/Lung，旧数据为NULL',
     dosage           DECIMAL(18, 6) NOT NULL                COMMENT '剂量',
     indicator_name   VARCHAR(100)   NOT NULL                COMMENT '指标名称',
     indicator_value  DECIMAL(18, 6) NOT NULL                COMMENT '观测数值',
@@ -55,6 +58,7 @@ CREATE TABLE dataset_raw (
     create_time      DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '入库时间',
     PRIMARY KEY (id),
     KEY idx_dataset_main (animal_type, chemical_name, indicator_name),
+    KEY idx_dataset_multi_organ (animal_type, chemical_name, organ, indicator_name),
     KEY idx_dataset_temperature (temperature)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='历史原始实验数据（训练语料）';
 
@@ -129,10 +133,11 @@ CREATE TABLE sys_comment_like (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='评论点赞记录表';
 
 -- ─── 示例：实验方案 ───────────────────────────────────────
-INSERT INTO experiment (name, animal_type, chemical_name, indicator_name, description, status) VALUES
-('小鼠乙醇肝毒性初筛方案', 'MOUSE',  '乙醇',         '血清ALT(U/L)',  '基于历史 ALT 数据的数字孪生初筛', 'APPROVED'),
-('兔角膜丙酮刺激评估方案', 'RABBIT', '丙酮',         '角膜刺激评分',  '角膜刺激评分数字孪生映射', 'APPROVED'),
-('蛙皮肤 SDS 反应方案',    'FROG',   '十二烷基硫酸钠', '皮肤反应指数', '皮肤反应指数模拟', 'APPROVED');
+INSERT INTO experiment (name, animal_type, chemical_name, simulation_mode, indicator_name, target_organs, description, status) VALUES
+('小鼠乙醇肝毒性初筛方案', 'MOUSE',  '乙醇', 'SINGLE', '血清ALT(U/L)', NULL, '基于历史 ALT 数据的数字孪生初筛', 'APPROVED'),
+('兔角膜丙酮刺激评估方案', 'RABBIT', '丙酮', 'SINGLE', '角膜刺激评分', NULL, '角膜刺激评分数字孪生映射', 'APPROVED'),
+('蛙皮肤 SDS 反应方案',    'FROG',   '十二烷基硫酸钠', 'SINGLE', '皮肤反应指数', NULL, '皮肤反应指数模拟', 'APPROVED'),
+('小鼠乙醇多器官毒性评估', 'MOUSE',  '乙醇', 'MULTI_ORGAN', NULL, 'Heart,Liver,Lung', '多器官协同仿真评估乙醇对心肝肺的综合影响', 'APPROVED');
 
 -- ─── 训练语料（历史原始数据）────────────────────────────────
 -- 设计说明（教学/原型用，数值在合理医学量级内，并体现剂量–反应关系）：
@@ -193,3 +198,109 @@ INSERT INTO dataset_raw (animal_type, chemical_name, dosage, indicator_name, ind
 ('FROG', '十二烷基硫酸钠', 0.300000, '皮肤反应指数', 0.980000, 21.50),
 ('FROG', '十二烷基硫酸钠', 0.450000, '皮肤反应指数', 1.250000, 22.00),
 ('FROG', '十二烷基硫酸钠', 0.600000, '皮肤反应指数', 1.480000, 22.50);
+
+-- ========== 多器官协同仿真训练数据 ==========
+INSERT INTO dataset_raw (animal_type, chemical_name, organ, dosage, indicator_name, indicator_value, temperature) VALUES
+-- MOUSE + 乙醇 + Heart（心脏）+ Heart_Rate（心率）
+('MOUSE', '乙醇', 'Heart', 0.500000, 'Heart_Rate', 480.000000, 22.00),
+('MOUSE', '乙醇', 'Heart', 1.000000, 'Heart_Rate', 495.000000, 22.00),
+('MOUSE', '乙醇', 'Heart', 2.000000, 'Heart_Rate', 520.000000, 22.50),
+('MOUSE', '乙醇', 'Heart', 4.000000, 'Heart_Rate', 560.000000, 23.00),
+('MOUSE', '乙醇', 'Heart', 6.000000, 'Heart_Rate', 590.000000, 23.50),
+('MOUSE', '乙醇', 'Heart', 8.000000, 'Heart_Rate', 610.000000, 24.00),
+('MOUSE', '乙醇', 'Heart', 10.000000, 'Heart_Rate', 580.000000, 24.00),
+('MOUSE', '乙醇', 'Heart', 12.000000, 'Heart_Rate', 540.000000, 24.50),
+
+-- MOUSE + 乙醇 + Liver（肝脏）+ ALT
+('MOUSE', '乙醇', 'Liver', 0.500000, 'ALT', 32.000000, 22.00),
+('MOUSE', '乙醇', 'Liver', 1.000000, 'ALT', 38.000000, 22.00),
+('MOUSE', '乙醇', 'Liver', 2.000000, 'ALT', 48.000000, 22.50),
+('MOUSE', '乙醇', 'Liver', 4.000000, 'ALT', 68.000000, 23.00),
+('MOUSE', '乙醇', 'Liver', 6.000000, 'ALT', 92.000000, 23.50),
+('MOUSE', '乙醇', 'Liver', 8.000000, 'ALT', 118.000000, 24.00),
+('MOUSE', '乙醇', 'Liver', 10.000000, 'ALT', 145.000000, 24.00),
+('MOUSE', '乙醇', 'Liver', 12.000000, 'ALT', 168.000000, 24.50),
+
+-- MOUSE + 乙醇 + Liver（肝脏）+ AST
+('MOUSE', '乙醇', 'Liver', 0.500000, 'AST', 85.000000, 22.00),
+('MOUSE', '乙醇', 'Liver', 1.000000, 'AST', 95.000000, 22.00),
+('MOUSE', '乙醇', 'Liver', 2.000000, 'AST', 110.000000, 22.50),
+('MOUSE', '乙醇', 'Liver', 4.000000, 'AST', 140.000000, 23.00),
+('MOUSE', '乙醇', 'Liver', 6.000000, 'AST', 175.000000, 23.50),
+('MOUSE', '乙醇', 'Liver', 8.000000, 'AST', 210.000000, 24.00),
+('MOUSE', '乙醇', 'Liver', 10.000000, 'AST', 245.000000, 24.00),
+('MOUSE', '乙醇', 'Liver', 12.000000, 'AST', 275.000000, 24.50),
+
+-- MOUSE + 乙醇 + Lung（肺）+ Respiratory_Rate（呼吸频率）
+('MOUSE', '乙醇', 'Lung', 0.500000, 'Respiratory_Rate', 115.000000, 22.00),
+('MOUSE', '乙醇', 'Lung', 1.000000, 'Respiratory_Rate', 110.000000, 22.00),
+('MOUSE', '乙醇', 'Lung', 2.000000, 'Respiratory_Rate', 105.000000, 22.50),
+('MOUSE', '乙醇', 'Lung', 4.000000, 'Respiratory_Rate', 95.000000, 23.00),
+('MOUSE', '乙醇', 'Lung', 6.000000, 'Respiratory_Rate', 85.000000, 23.50),
+('MOUSE', '乙醇', 'Lung', 8.000000, 'Respiratory_Rate', 75.000000, 24.00),
+('MOUSE', '乙醇', 'Lung', 10.000000, 'Respiratory_Rate', 68.000000, 24.00),
+('MOUSE', '乙醇', 'Lung', 12.000000, 'Respiratory_Rate', 62.000000, 24.50),
+
+-- RABBIT + 乙醇 + Heart（心脏）+ Heart_Rate
+('RABBIT', '乙醇', 'Heart', 0.500000, 'Heart_Rate', 195.000000, 22.00),
+('RABBIT', '乙醇', 'Heart', 1.000000, 'Heart_Rate', 205.000000, 22.00),
+('RABBIT', '乙醇', 'Heart', 2.000000, 'Heart_Rate', 220.000000, 22.50),
+('RABBIT', '乙醇', 'Heart', 4.000000, 'Heart_Rate', 240.000000, 23.00),
+('RABBIT', '乙醇', 'Heart', 6.000000, 'Heart_Rate', 230.000000, 23.50),
+('RABBIT', '乙醇', 'Heart', 8.000000, 'Heart_Rate', 210.000000, 24.00),
+
+-- RABBIT + 乙醇 + Liver + ALT
+('RABBIT', '乙醇', 'Liver', 0.500000, 'ALT', 35.000000, 22.00),
+('RABBIT', '乙醇', 'Liver', 1.000000, 'ALT', 42.000000, 22.00),
+('RABBIT', '乙醇', 'Liver', 2.000000, 'ALT', 55.000000, 22.50),
+('RABBIT', '乙醇', 'Liver', 4.000000, 'ALT', 78.000000, 23.00),
+('RABBIT', '乙醇', 'Liver', 6.000000, 'ALT', 105.000000, 23.50),
+('RABBIT', '乙醇', 'Liver', 8.000000, 'ALT', 132.000000, 24.00),
+
+-- RABBIT + 乙醇 + Liver + AST
+('RABBIT', '乙醇', 'Liver', 0.500000, 'AST', 95.000000, 22.00),
+('RABBIT', '乙醇', 'Liver', 1.000000, 'AST', 108.000000, 22.00),
+('RABBIT', '乙醇', 'Liver', 2.000000, 'AST', 128.000000, 22.50),
+('RABBIT', '乙醇', 'Liver', 4.000000, 'AST', 165.000000, 23.00),
+('RABBIT', '乙醇', 'Liver', 6.000000, 'AST', 205.000000, 23.50),
+('RABBIT', '乙醇', 'Liver', 8.000000, 'AST', 245.000000, 24.00),
+
+-- RABBIT + 乙醇 + Lung + Respiratory_Rate
+('RABBIT', '乙醇', 'Lung', 0.500000, 'Respiratory_Rate', 48.000000, 22.00),
+('RABBIT', '乙醇', 'Lung', 1.000000, 'Respiratory_Rate', 45.000000, 22.00),
+('RABBIT', '乙醇', 'Lung', 2.000000, 'Respiratory_Rate', 42.000000, 22.50),
+('RABBIT', '乙醇', 'Lung', 4.000000, 'Respiratory_Rate', 36.000000, 23.00),
+('RABBIT', '乙醇', 'Lung', 6.000000, 'Respiratory_Rate', 32.000000, 23.50),
+('RABBIT', '乙醇', 'Lung', 8.000000, 'Respiratory_Rate', 28.000000, 24.00),
+
+-- FROG + 乙醇 + Heart + Heart_Rate
+('FROG', '乙醇', 'Heart', 0.200000, 'Heart_Rate', 48.000000, 20.00),
+('FROG', '乙醇', 'Heart', 0.500000, 'Heart_Rate', 52.000000, 20.00),
+('FROG', '乙醇', 'Heart', 1.000000, 'Heart_Rate', 56.000000, 20.50),
+('FROG', '乙醇', 'Heart', 2.000000, 'Heart_Rate', 58.000000, 21.00),
+('FROG', '乙醇', 'Heart', 3.000000, 'Heart_Rate', 54.000000, 21.50),
+('FROG', '乙醇', 'Heart', 4.000000, 'Heart_Rate', 48.000000, 22.00),
+
+-- FROG + 乙醇 + Liver + ALT
+('FROG', '乙醇', 'Liver', 0.200000, 'ALT', 22.000000, 20.00),
+('FROG', '乙醇', 'Liver', 0.500000, 'ALT', 28.000000, 20.00),
+('FROG', '乙醇', 'Liver', 1.000000, 'ALT', 36.000000, 20.50),
+('FROG', '乙醇', 'Liver', 2.000000, 'ALT', 52.000000, 21.00),
+('FROG', '乙醇', 'Liver', 3.000000, 'ALT', 68.000000, 21.50),
+('FROG', '乙醇', 'Liver', 4.000000, 'ALT', 85.000000, 22.00),
+
+-- FROG + 乙醇 + Liver + AST
+('FROG', '乙醇', 'Liver', 0.200000, 'AST', 58.000000, 20.00),
+('FROG', '乙醇', 'Liver', 0.500000, 'AST', 68.000000, 20.00),
+('FROG', '乙醇', 'Liver', 1.000000, 'AST', 82.000000, 20.50),
+('FROG', '乙醇', 'Liver', 2.000000, 'AST', 108.000000, 21.00),
+('FROG', '乙醇', 'Liver', 3.000000, 'AST', 135.000000, 21.50),
+('FROG', '乙醇', 'Liver', 4.000000, 'AST', 162.000000, 22.00),
+
+-- FROG + 乙醇 + Lung + Respiratory_Rate
+('FROG', '乙醇', 'Lung', 0.200000, 'Respiratory_Rate', 32.000000, 20.00),
+('FROG', '乙醇', 'Lung', 0.500000, 'Respiratory_Rate', 30.000000, 20.00),
+('FROG', '乙醇', 'Lung', 1.000000, 'Respiratory_Rate', 28.000000, 20.50),
+('FROG', '乙醇', 'Lung', 2.000000, 'Respiratory_Rate', 24.000000, 21.00),
+('FROG', '乙醇', 'Lung', 3.000000, 'Respiratory_Rate', 21.000000, 21.50),
+('FROG', '乙醇', 'Lung', 4.000000, 'Respiratory_Rate', 18.000000, 22.00);

@@ -80,6 +80,12 @@ public class ExperimentServiceImpl implements ExperimentService {
         toCreate.setAnimalType(experiment.getAnimalType().trim().toUpperCase());
         toCreate.setChemicalName(experiment.getChemicalName().trim());
         toCreate.setIndicatorName(experiment.getIndicatorName().trim());
+
+        // 【核心修复：新增这3行，接收前端传值并提供默认兜底】
+        String mode = experiment.getSimulationMode();
+        toCreate.setSimulationMode(StringUtils.hasText(mode) ? mode.trim() : "SINGLE");
+        toCreate.setTargetOrgans(blankToNull(experiment.getTargetOrgans()));
+
         toCreate.setDescription(experiment.getDescription());
         toCreate.setStatus(ExperimentStatuses.DRAFT);
         toCreate.setSubmittedBy(currentUser.getId());
@@ -101,6 +107,12 @@ public class ExperimentServiceImpl implements ExperimentService {
         existing.setAnimalType(experiment.getAnimalType().trim().toUpperCase());
         existing.setChemicalName(experiment.getChemicalName().trim());
         existing.setIndicatorName(experiment.getIndicatorName().trim());
+
+        // 【核心修复：新增这3行，确保编辑时也能更新仿真模式】
+        String mode = experiment.getSimulationMode();
+        existing.setSimulationMode(StringUtils.hasText(mode) ? mode.trim() : "SINGLE");
+        existing.setTargetOrgans(blankToNull(experiment.getTargetOrgans()));
+
         existing.setDescription(experiment.getDescription());
         existing.setReviewedBy(null);
         existing.setReviewedTime(null);

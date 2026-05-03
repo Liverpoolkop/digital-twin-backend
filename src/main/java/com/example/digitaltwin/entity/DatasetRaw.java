@@ -18,6 +18,9 @@ public class DatasetRaw {
     /** 化学物质名称 */
     private String chemicalName;
 
+    /** 器官名称：Heart/Liver/Lung，旧数据为null */
+    private String organ;
+
     /** 给药剂量（如 mg/kg） */
     private BigDecimal dosage;
 
@@ -55,6 +58,14 @@ public class DatasetRaw {
 
     public void setChemicalName(String chemicalName) {
         this.chemicalName = chemicalName;
+    }
+
+    public String getOrgan() {
+        return organ;
+    }
+
+    public void setOrgan(String organ) {
+        this.organ = organ;
     }
 
     public BigDecimal getDosage() {

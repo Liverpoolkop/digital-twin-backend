@@ -1,6 +1,9 @@
 package com.example.digitaltwin.controller;
 
 import com.example.digitaltwin.common.Result;
+import com.example.digitaltwin.dto.AiComparisonResult;
+import com.example.digitaltwin.dto.MultiOrganSimulationRequest;
+import com.example.digitaltwin.dto.MultiOrganSimulationResult;
 import com.example.digitaltwin.dto.SimulationRequest;
 import com.example.digitaltwin.entity.SimulationRecord;
 import com.example.digitaltwin.service.SimulationEngineService;
@@ -56,6 +59,52 @@ public class SimulationController {
         } catch (Exception e) {
             log.error("[SimulationController] 未知异常", e);
             return Result.error("仿真引擎内部错误，请稍后重试");
+        }
+    }
+
+    /**
+     * 执行多器官协同仿真
+     */
+    @PostMapping("/run-multi-organ")
+    public Result<MultiOrganSimulationResult> runMultiOrgan(@RequestBody MultiOrganSimulationRequest req) {
+        log.info("[SimulationController] 收到多器官仿真请求");
+        try {
+            if (req.getOrgans() == null || req.getOrgans().isEmpty()) {
+                return Result.error("器官列表不能为空");
+            }
+            MultiOrganSimulationResult result = simulationEngineService.runMultiOrganSimulation(req);
+            return Result.success(result);
+        } catch (IllegalArgumentException e) {
+            log.warn("[SimulationController] 参数异常: {}", e.getMessage());
+            return Result.error("参数错误：" + e.getMessage());
+        } catch (IllegalStateException e) {
+            log.warn("[SimulationController] 业务异常: {}", e.getMessage());
+            return Result.error(e.getMessage());
+        } catch (Exception e) {
+            log.error("[SimulationController] 未知异常", e);
+            return Result.error("多器官仿真引擎内部错误，请稍后重试");
+        }
+    }
+
+    /**
+     * 执行AI对比模式仿真
+     * 返回AI预测曲线和三种数学拟合曲线
+     */
+    @PostMapping("/run-ai-comparison")
+    public Result<AiComparisonResult> runAiComparison(@RequestBody SimulationRequest req) {
+        log.info("[SimulationController] 收到AI对比模式请求");
+        try {
+            AiComparisonResult result = simulationEngineService.runAiComparison(req);
+            return Result.success(result);
+        } catch (IllegalArgumentException e) {
+            log.warn("[SimulationController] 参数异常: {}", e.getMessage());
+            return Result.error("参数错误：" + e.getMessage());
+        } catch (IllegalStateException e) {
+            log.warn("[SimulationController] 业务异常: {}", e.getMessage());
+            return Result.error(e.getMessage());
+        } catch (Exception e) {
+            log.error("[SimulationController] 未知异常", e);
+            return Result.error("AI对比模式内部错误，请稍后重试");
         }
     }
 }

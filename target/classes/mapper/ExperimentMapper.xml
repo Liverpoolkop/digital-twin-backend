@@ -5,23 +5,25 @@
 <mapper namespace="com.example.digitaltwin.mapper.ExperimentMapper">
 
     <resultMap id="BaseResultMap" type="Experiment">
-        <id     column="id"             property="id"/>
-        <result column="name"           property="name"/>
-        <result column="animal_type"    property="animalType"/>
-        <result column="chemical_name"  property="chemicalName"/>
-        <result column="indicator_name" property="indicatorName"/>
-        <result column="description"    property="description"/>
-        <result column="status"         property="status"/>
-        <result column="submitted_by"   property="submittedBy"/>
-        <result column="reviewed_by"    property="reviewedBy"/>
-        <result column="reviewed_time"  property="reviewedTime"/>
-        <result column="review_comment" property="reviewComment"/>
-        <result column="created_time"   property="createdTime"/>
-        <result column="updated_time"   property="updatedTime"/>
+        <id     column="id"              property="id"/>
+        <result column="name"            property="name"/>
+        <result column="animal_type"     property="animalType"/>
+        <result column="chemical_name"   property="chemicalName"/>
+        <result column="simulation_mode" property="simulationMode"/>
+        <result column="indicator_name"  property="indicatorName"/>
+        <result column="target_organs"   property="targetOrgans"/>
+        <result column="description"     property="description"/>
+        <result column="status"          property="status"/>
+        <result column="submitted_by"    property="submittedBy"/>
+        <result column="reviewed_by"     property="reviewedBy"/>
+        <result column="reviewed_time"   property="reviewedTime"/>
+        <result column="review_comment"  property="reviewComment"/>
+        <result column="created_time"    property="createdTime"/>
+        <result column="updated_time"    property="updatedTime"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, name, animal_type, chemical_name, indicator_name, description,
+        id, name, animal_type, chemical_name, simulation_mode, indicator_name, target_organs, description,
         status, submitted_by, reviewed_by, reviewed_time, review_comment,
         created_time, updated_time
     </sql>
@@ -75,11 +77,11 @@
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO experiment (
-            name, animal_type, chemical_name, indicator_name, description,
+            name, animal_type, chemical_name, simulation_mode, indicator_name, target_organs, description,
             status, submitted_by, reviewed_by, reviewed_time, review_comment
         )
         VALUES (
-            #{name}, #{animalType}, #{chemicalName}, #{indicatorName}, #{description},
+            #{name}, #{animalType}, #{chemicalName}, #{simulationMode}, #{indicatorName}, #{targetOrgans}, #{description},
             #{status}, #{submittedBy}, #{reviewedBy}, #{reviewedTime}, #{reviewComment}
         )
     </insert>
@@ -90,7 +92,9 @@
             <if test="name != null and name != ''">name = #{name},</if>
             <if test="animalType != null and animalType != ''">animal_type = #{animalType},</if>
             <if test="chemicalName != null and chemicalName != ''">chemical_name = #{chemicalName},</if>
-            <if test="indicatorName != null and indicatorName != ''">indicator_name = #{indicatorName},</if>
+            <if test="simulationMode != null and simulationMode != ''">simulation_mode = #{simulationMode},</if>
+            <if test="indicatorName != null">indicator_name = #{indicatorName},</if>
+            <if test="targetOrgans != null">target_organs = #{targetOrgans},</if>
             <if test="description != null">description = #{description},</if>
             <if test="status != null and status != ''">status = #{status},</if>
             <if test="submittedBy != null">submitted_by = #{submittedBy},</if>
