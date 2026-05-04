@@ -25,11 +25,13 @@ com\example\digitaltwin\service\impl\SimulationEngineServiceImpl$IndicatorMeta.c
 com\example\digitaltwin\dto\TimeValuePoint.class
 com\example\digitaltwin\dto\CommentAuditRequest.class
 com\example\digitaltwin\service\impl\CommentServiceImpl.class
+com\example\digitaltwin\mapper\IndicatorBaselineMapper.class
 com\example\digitaltwin\mapper\ExperimentMapper.class
 com\example\digitaltwin\security\JwtAuthenticationFilter.class
 com\example\digitaltwin\entity\SimulationRecord.class
 com\example\digitaltwin\service\LlmContextBuilder.class
 com\example\digitaltwin\config\AdminUserInitializer.class
+com\example\digitaltwin\entity\IndicatorBaseline.class
 com\example\digitaltwin\security\AuthenticatedUser.class
 com\example\digitaltwin\service\ExperimentService.class
 com\example\digitaltwin\service\impl\DatasetRawAdminServiceImpl.class
@@ -44,6 +46,7 @@ com\example\digitaltwin\service\AiPredictService.class
 com\example\digitaltwin\service\CommentService.class
 com\example\digitaltwin\common\Result.class
 com\example\digitaltwin\service\SimulationReportService.class
+com\example\digitaltwin\service\DamageAssessmentService.class
 com\example\digitaltwin\controller\CommentController.class
 com\example\digitaltwin\dto\LoginResponse.class
 com\example\digitaltwin\controller\SimulationController.class

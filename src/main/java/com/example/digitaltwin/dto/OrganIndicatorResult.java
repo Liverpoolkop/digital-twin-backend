@@ -17,6 +17,9 @@ public class OrganIndicatorResult {
     /** 单位 */
     private String unit;
 
+    /** 受损评分 0-100 */
+    private Double damageScore;
+
     public String getOrgan() {
         return organ;
     }
@@ -47,5 +50,13 @@ public class OrganIndicatorResult {
 
     public void setUnit(String unit) {
         this.unit = unit;
+    }
+
+    public Double getDamageScore() {
+        return damageScore;
+    }
+
+    public void setDamageScore(Double damageScore) {
+        this.damageScore = damageScore;
     }
 }

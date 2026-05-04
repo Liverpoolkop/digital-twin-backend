@@ -27,6 +27,9 @@ public class MultiOrganSimulationResult {
     /** 仿真时间 */
     private LocalDateTime simulationTime;
 
+    /** 器官受损评分映射：key=器官名, value=该器官的受损评分(0-100) */
+    private Map<String, Double> organDamageScores;
+
     public String getTargetAnimal() {
         return targetAnimal;
     }
@@ -73,5 +76,13 @@ public class MultiOrganSimulationResult {
 
     public void setSimulationTime(LocalDateTime simulationTime) {
         this.simulationTime = simulationTime;
+    }
+
+    public Map<String, Double> getOrganDamageScores() {
+        return organDamageScores;
+    }
+
+    public void setOrganDamageScores(Map<String, Double> organDamageScores) {
+        this.organDamageScores = organDamageScores;
     }
 }

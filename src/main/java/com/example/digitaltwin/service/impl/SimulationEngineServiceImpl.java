@@ -16,6 +16,7 @@ import com.example.digitaltwin.mapper.SimulationRecordMapper;
 import com.example.digitaltwin.security.AuthenticatedUser;
 import com.example.digitaltwin.security.SecurityUtils;
 import com.example.digitaltwin.service.AiPredictService;
+import com.example.digitaltwin.service.DamageAssessmentService;
 import com.example.digitaltwin.service.LlmContextBuilder;
 import com.example.digitaltwin.service.SimulationEngineService;
 import org.apache.commons.math3.fitting.PolynomialCurveFitter;
@@ -51,15 +52,18 @@ public class SimulationEngineServiceImpl implements SimulationEngineService {
     private final SimulationRecordMapper simulationRecordMapper;
     private final AiPredictService aiPredictService;
     private final LlmContextBuilder contextBuilder;
+    private final DamageAssessmentService damageAssessmentService;
 
     public SimulationEngineServiceImpl(DatasetRawMapper datasetRawMapper,
                                        SimulationRecordMapper simulationRecordMapper,
                                        AiPredictService aiPredictService,
-                                       LlmContextBuilder contextBuilder) {
+                                       LlmContextBuilder contextBuilder,
+                                       DamageAssessmentService damageAssessmentService) {
         this.datasetRawMapper = datasetRawMapper;
         this.simulationRecordMapper = simulationRecordMapper;
         this.aiPredictService = aiPredictService;
         this.contextBuilder = contextBuilder;
+        this.damageAssessmentService = damageAssessmentService;
     }
 
     @Override
@@ -178,6 +182,7 @@ public class SimulationEngineServiceImpl implements SimulationEngineService {
     @Override
     public MultiOrganSimulationResult runMultiOrganSimulation(MultiOrganSimulationRequest req) {
         Map<String, List<OrganIndicatorResult>> organResults = new HashMap<>();
+        Map<String, Double> organDamageScores = new HashMap<>(); // 新增：器官级受损评分
 
         for (String organ : req.getOrgans()) {
             List<IndicatorMeta> indicators = ORGAN_INDICATOR_MAP.get(organ);
@@ -186,6 +191,8 @@ public class SimulationEngineServiceImpl implements SimulationEngineService {
             }
 
             List<OrganIndicatorResult> indicatorResults = new ArrayList<>();
+            double maxDamageScore = 0.0; // 该器官的最大受损值
+
             for (IndicatorMeta indicator : indicators) {
                 List<DatasetRaw> trainingData = datasetRawMapper.selectByMultiOrganConditions(
                     req.getTargetAnimal(),
@@ -202,15 +209,23 @@ public class SimulationEngineServiceImpl implements SimulationEngineService {
 
                 double predictedValue = trainAndPredict(trainingData, req.getTargetDosage(), req.getSelectedModel());
 
+                // 新增：计算受损评分
+                Double damageScore = damageAssessmentService.calculateDamageScore(
+                    req.getTargetAnimal(), organ, indicator.name, predictedValue
+                );
+                maxDamageScore = Math.max(maxDamageScore, damageScore);
+
                 OrganIndicatorResult result = new OrganIndicatorResult();
                 result.setOrgan(organ);
                 result.setIndicatorName(indicator.name);
                 result.setPredictedValue(predictedValue);
                 result.setUnit(indicator.unit);
+                result.setDamageScore(damageScore); // 新增
                 indicatorResults.add(result);
             }
 
             organResults.put(organ, indicatorResults);
+            organDamageScores.put(organ, maxDamageScore); // 新增：存储器官级受损值
         }
 
         MultiOrganSimulationResult result = new MultiOrganSimulationResult();
@@ -219,6 +234,7 @@ public class SimulationEngineServiceImpl implements SimulationEngineService {
         result.setTargetDosage(req.getTargetDosage());
         result.setSelectedModel(req.getSelectedModel());
         result.setOrganResults(organResults);
+        result.setOrganDamageScores(organDamageScores); // 新增
         result.setSimulationTime(LocalDateTime.now());
 
         return result;
@@ -353,6 +369,7 @@ public class SimulationEngineServiceImpl implements SimulationEngineService {
 
         MultiOrganAiComparisonResult result = new MultiOrganAiComparisonResult();
         List<IndicatorAiComparison> indicators = new ArrayList<>();
+        Map<String, Double> organDamageScores = new HashMap<>();
 
         int successCount = 0;
         int totalCount = req.getIndicatorNames().size();
@@ -384,12 +401,25 @@ public class SimulationEngineServiceImpl implements SimulationEngineService {
 
             indicators.add(indicator);
 
+            // 计算受损评分
+            try {
+                double predictedValue = extractInitialValue(indicator);
+                String organ = inferOrganFromIndicator(indicatorName);
+                Double damageScore = damageAssessmentService.calculateDamageScore(
+                    req.getAnimalType(), organ, indicatorName, predictedValue
+                );
+                organDamageScores.merge(organ, damageScore, Math::max);
+            } catch (Exception e) {
+                log.warn("[多指标AI对比] 指标 {} 受损评分计算失败: {}", indicatorName, e.getMessage());
+            }
+
             if ("AI_SUCCESS".equals(aiResult.getPredictionSource())) {
                 successCount++;
             }
         }
 
         result.setIndicators(indicators);
+        result.setOrganDamageScores(organDamageScores);
 
         // 判断整体预测来源
         if (successCount == totalCount) {
@@ -404,5 +434,31 @@ public class SimulationEngineServiceImpl implements SimulationEngineService {
             successCount, totalCount, result.getPredictionSource());
 
         return result;
+    }
+
+    /**
+     * 从指标AI对比结果中提取初始预测值（t=0时刻）
+     */
+    private double extractInitialValue(IndicatorAiComparison indicator) {
+        List<TimeValuePoint> curve = indicator.getAiCurve();
+        if (curve == null || curve.isEmpty()) {
+            curve = indicator.getPolynomialCurve();
+        }
+        if (curve == null || curve.isEmpty()) {
+            throw new IllegalStateException("无可用曲线数据");
+        }
+        return curve.get(0).getValue();
+    }
+
+    /**
+     * 从指标名称推断器官名称
+     */
+    private String inferOrganFromIndicator(String indicatorName) {
+        return switch (indicatorName) {
+            case "Heart_Rate" -> "Heart";
+            case "ALT", "AST" -> "Liver";
+            case "Respiratory_Rate" -> "Lung";
+            default -> throw new IllegalArgumentException("未知指标: " + indicatorName);
+        };
     }
 }

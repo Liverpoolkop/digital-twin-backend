@@ -53,13 +53,16 @@ D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\common\E
 D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\dto\PageResult.java
 D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\controller\ExperimentController.java
 D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\dto\MultiIndicatorAiComparisonRequest.java
+D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\service\DamageAssessmentService.java
 D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\common\CommentStatuses.java
 D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\dto\MultiOrganSimulationRequest.java
 D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\controller\AdminDashboardController.java
 D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\controller\AdminCommentController.java
 D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\entity\Experiment.java
 D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\mapper\CommentLikeMapper.java
+D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\mapper\IndicatorBaselineMapper.java
 D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\service\DashboardService.java
 D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\service\impl\CommentServiceImpl.java
+D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\entity\IndicatorBaseline.java
 D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\dto\TimeValuePoint.java
 D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\service\CommentService.java

@@ -304,3 +304,41 @@ INSERT INTO dataset_raw (animal_type, chemical_name, organ, dosage, indicator_na
 ('FROG', '乙醇', 'Lung', 2.000000, 'Respiratory_Rate', 24.000000, 21.00),
 ('FROG', '乙醇', 'Lung', 3.000000, 'Respiratory_Rate', 21.000000, 21.50),
 ('FROG', '乙醇', 'Lung', 4.000000, 'Respiratory_Rate', 18.000000, 22.00);
+
+-- ========== 生理指标基准表 ==========
+-- 用于存储不同物种各器官指标的正常范围和危险阈值，支持器官受损评估
+DROP TABLE IF EXISTS sys_indicator_baseline;
+
+CREATE TABLE sys_indicator_baseline (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键',
+  species VARCHAR(50) NOT NULL COMMENT '物种（MOUSE/RABBIT/FROG）',
+  organ_name VARCHAR(50) NOT NULL COMMENT '器官名称（Heart/Liver/Lung）',
+  indicator_name VARCHAR(100) NOT NULL COMMENT '指标名称',
+  normal_min DECIMAL(10,4) NOT NULL COMMENT '正常值下限',
+  normal_max DECIMAL(10,4) NOT NULL COMMENT '正常值上限',
+  danger_threshold DECIMAL(10,4) NOT NULL COMMENT '危险阈值',
+  unit VARCHAR(20) COMMENT '单位',
+  created_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  updated_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  UNIQUE KEY uk_species_organ_indicator (species, organ_name, indicator_name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='生理指标基准表';
+
+-- 插入小鼠基准数据
+INSERT INTO sys_indicator_baseline (species, organ_name, indicator_name, normal_min, normal_max, danger_threshold, unit) VALUES
+('MOUSE', 'Heart', 'Heart_Rate', 400.0000, 600.0000, 800.0000, '次/分钟'),
+('MOUSE', 'Liver', 'ALT', 20.0000, 50.0000, 150.0000, 'U/L'),
+('MOUSE', 'Liver', 'AST', 25.0000, 55.0000, 160.0000, 'U/L'),
+('MOUSE', 'Lung', 'Respiratory_Rate', 80.0000, 120.0000, 200.0000, '次/分钟'),
+
+-- 插入兔子基准数据
+('RABBIT', 'Heart', 'Heart_Rate', 180.0000, 250.0000, 350.0000, '次/分钟'),
+('RABBIT', 'Liver', 'ALT', 25.0000, 55.0000, 150.0000, 'U/L'),
+('RABBIT', 'Liver', 'AST', 30.0000, 65.0000, 180.0000, 'U/L'),
+('RABBIT', 'Lung', 'Respiratory_Rate', 30.0000, 60.0000, 80.0000, '次/分钟'),
+
+-- 插入青蛙基准数据
+('FROG', 'Heart', 'Heart_Rate', 40.0000, 60.0000, 90.0000, '次/分钟'),
+('FROG', 'Liver', 'ALT', 15.0000, 40.0000, 100.0000, 'U/L'),
+('FROG', 'Liver', 'AST', 40.0000, 80.0000, 180.0000, 'U/L'),
+('FROG', 'Lung', 'Respiratory_Rate', 20.0000, 40.0000, 60.0000, '次/分钟');
+
