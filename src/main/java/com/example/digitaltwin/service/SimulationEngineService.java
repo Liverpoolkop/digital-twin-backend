@@ -1,6 +1,8 @@
 package com.example.digitaltwin.service;
 
 import com.example.digitaltwin.dto.AiComparisonResult;
+import com.example.digitaltwin.dto.MultiIndicatorAiComparisonRequest;
+import com.example.digitaltwin.dto.MultiOrganAiComparisonResult;
 import com.example.digitaltwin.dto.MultiOrganSimulationRequest;
 import com.example.digitaltwin.dto.MultiOrganSimulationResult;
 import com.example.digitaltwin.dto.SimulationRequest;
@@ -32,4 +34,13 @@ public interface SimulationEngineService {
      * @return AI对比结果（包含4条曲线）
      */
     AiComparisonResult runAiComparison(SimulationRequest req);
+
+    /**
+     * 执行多指标AI对比模式仿真
+     * 为每个指标返回AI预测曲线和三种数学拟合曲线
+     *
+     * @param req 多指标AI对比请求参数
+     * @return 多指标AI对比结果
+     */
+    MultiOrganAiComparisonResult runMultiOrganAiComparison(MultiIndicatorAiComparisonRequest req);
 }

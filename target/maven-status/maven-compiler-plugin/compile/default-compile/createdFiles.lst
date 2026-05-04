@@ -1,6 +1,7 @@
 com\example\digitaltwin\controller\ExperimentController.class
 com\example\digitaltwin\service\impl\DashboardServiceImpl.class
 com\example\digitaltwin\config\SecurityConfig.class
+com\example\digitaltwin\dto\MultiIndicatorAiComparisonRequest.class
 com\example\digitaltwin\dto\MultiOrganSimulationRequest.class
 com\example\digitaltwin\controller\AdminDashboardController.class
 com\example\digitaltwin\mapper\DatasetRawMapper.class
@@ -15,6 +16,7 @@ com\example\digitaltwin\config\AiPredictionConfig.class
 com\example\digitaltwin\service\UserService.class
 com\example\digitaltwin\dto\AiComparisonResult.class
 com\example\digitaltwin\entity\DatasetRaw.class
+com\example\digitaltwin\dto\IndicatorAiComparison.class
 com\example\digitaltwin\dto\SimulationRequest.class
 com\example\digitaltwin\mapper\CommentMapper.class
 com\example\digitaltwin\mapper\CommentLikeMapper.class
@@ -45,6 +47,7 @@ com\example\digitaltwin\service\SimulationReportService.class
 com\example\digitaltwin\controller\CommentController.class
 com\example\digitaltwin\dto\LoginResponse.class
 com\example\digitaltwin\controller\SimulationController.class
+com\example\digitaltwin\dto\MultiOrganAiComparisonResult.class
 com\example\digitaltwin\dto\OrganIndicatorResult.class
 com\example\digitaltwin\entity\Comment.class
 com\example\digitaltwin\controller\AdminCommentController.class

@@ -1,6 +1,9 @@
 package com.example.digitaltwin.service.impl;
 
 import com.example.digitaltwin.dto.AiComparisonResult;
+import com.example.digitaltwin.dto.IndicatorAiComparison;
+import com.example.digitaltwin.dto.MultiIndicatorAiComparisonRequest;
+import com.example.digitaltwin.dto.MultiOrganAiComparisonResult;
 import com.example.digitaltwin.dto.MultiOrganSimulationRequest;
 import com.example.digitaltwin.dto.MultiOrganSimulationResult;
 import com.example.digitaltwin.dto.OrganIndicatorResult;
@@ -109,7 +112,7 @@ public class SimulationEngineServiceImpl implements SimulationEngineService {
                 double[] coeffs = polyFitter.fit(polyPoints.toList());
                 double x = req.getTargetDosage();
                 predictedValue = coeffs[0] + coeffs[1] * x + coeffs[2] * x * x;
-                log.info("[POLYNOMIAL] 系数 c0={}, c1={}, c2={}, 预测值={}",
+                log.info("[POLYNOMIAL] 系数 c0={}, c1={}, c2=, 预测值={}",
                         coeffs[0], coeffs[1], coeffs[2], predictedValue);
             }
             case "LOGARITHMIC" -> {
@@ -129,8 +132,10 @@ public class SimulationEngineServiceImpl implements SimulationEngineService {
                 log.info("[LOGARITHMIC] 截距 a={}, 斜率 b={}, 预测值={}",
                         logReg.getIntercept(), logReg.getSlope(), predictedValue);
             }
+            case "AI" -> throw new IllegalArgumentException(
+                    "AI模式请使用 /api/simulation/run-ai-comparison 接口");
             default -> throw new IllegalArgumentException(
-                    "不支持的算法模型：" + req.getAlgorithmModel() + "，可选值：LINEAR / POLYNOMIAL / LOGARITHMIC");
+                    "不支持的算法模型：" + req.getAlgorithmModel() + "，可选值：LINEAR / POLYNOMIAL / LOGARITHMIC / AI");
         }
 
         // ─── 4. 封装并持久化仿真记录 ──────────────────────────────────────────
@@ -307,6 +312,8 @@ public class SimulationEngineServiceImpl implements SimulationEngineService {
                 throw new IllegalStateException("对数回归需要至少2个有效样本（dosage > 0）");
             }
             return regression.predict(Math.log(targetDosage));
+        } else if ("AI".equals(modelUpper)) {
+            throw new IllegalArgumentException("AI模式请使用 /api/simulation/run-multi-indicator-ai-comparison 接口");
         } else {
             throw new IllegalArgumentException("不支持的算法模型：" + model);
         }
@@ -337,5 +344,65 @@ public class SimulationEngineServiceImpl implements SimulationEngineService {
         }
 
         return curve;
+    }
+
+    @Override
+    public MultiOrganAiComparisonResult runMultiOrganAiComparison(MultiIndicatorAiComparisonRequest req) {
+        log.info("[多指标AI对比] 开始执行，物种=, 化学物质={}, 指标数量={}, 剂量={}",
+            req.getAnimalType(), req.getChemicalName(), req.getIndicatorNames().size(), req.getTargetDosage());
+
+        MultiOrganAiComparisonResult result = new MultiOrganAiComparisonResult();
+        List<IndicatorAiComparison> indicators = new ArrayList<>();
+
+        int successCount = 0;
+        int totalCount = req.getIndicatorNames().size();
+
+        // 遍历每个指标，分别进行AI对比
+        for (String indicatorName : req.getIndicatorNames()) {
+            log.info("[多指标AI对比] 处理指标: {}", indicatorName);
+
+            // 构建单指标请求
+            SimulationRequest singleReq = new SimulationRequest();
+            singleReq.setAnimalType(req.getAnimalType());
+            singleReq.setChemicalName(req.getChemicalName());
+            singleReq.setIndicatorName(indicatorName);
+            singleReq.setTargetDosage(req.getTargetDosage());
+            singleReq.setMinTemp(req.getMinTemp());
+            singleReq.setMaxTemp(req.getMaxTemp());
+
+            // 调用单指标AI对比
+            AiComparisonResult aiResult = runAiComparison(singleReq);
+
+            // 转换为IndicatorAiComparison
+            IndicatorAiComparison indicator = new IndicatorAiComparison();
+            indicator.setIndicatorName(indicatorName);
+            indicator.setAiCurve(aiResult.getAiCurve());
+            indicator.setLinearCurve(aiResult.getLinearCurve());
+            indicator.setPolynomialCurve(aiResult.getPolynomialCurve());
+            indicator.setLogarithmicCurve(aiResult.getLogarithmicCurve());
+            indicator.setPredictionSource(aiResult.getPredictionSource());
+
+            indicators.add(indicator);
+
+            if ("AI_SUCCESS".equals(aiResult.getPredictionSource())) {
+                successCount++;
+            }
+        }
+
+        result.setIndicators(indicators);
+
+        // 判断整体预测来源
+        if (successCount == totalCount) {
+            result.setPredictionSource("AI_SUCCESS");
+        } else if (successCount > 0) {
+            result.setPredictionSource("AI_PARTIAL");
+        } else {
+            result.setPredictionSource("AI_FAILED");
+        }
+
+        log.info("[多指标AI对比] 完成，成功{}/{}个指标，整体状态={}",
+            successCount, totalCount, result.getPredictionSource());
+
+        return result;
     }
 }

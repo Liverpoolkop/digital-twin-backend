@@ -17,7 +17,8 @@
       "Bash(javap -cp /c/Users/lpsis/.m2/repository/com/volcengine/volcengine-java-sdk-ark-runtime/0.1.151/volcengine-java-sdk-ark-runtime-0.1.151.jar com.volcengine.ark.runtime.model.completion.chat.ChatCompletionResult)",
       "Bash(javap -cp /c/Users/lpsis/.m2/repository/com/volcengine/volcengine-java-sdk-ark-runtime/0.1.151/volcengine-java-sdk-ark-runtime-0.1.151.jar com.volcengine.ark.runtime.model.completion.chat.ChatCompletionChoice)",
       "Bash(javap -cp /c/Users/lpsis/.m2/repository/com/volcengine/volcengine-java-sdk-ark-runtime/0.1.151/volcengine-java-sdk-ark-runtime-0.1.151.jar com.volcengine.ark.runtime.model.completion.chat.ChatMessage)",
-      "Bash(javap -cp /c/Users/lpsis/.m2/repository/com/volcengine/volcengine-java-sdk-ark-runtime/0.1.151/volcengine-java-sdk-ark-runtime-0.1.151.jar 'com.volcengine.ark.runtime.service.ArkService$Builder')"
+      "Bash(javap -cp /c/Users/lpsis/.m2/repository/com/volcengine/volcengine-java-sdk-ark-runtime/0.1.151/volcengine-java-sdk-ark-runtime-0.1.151.jar 'com.volcengine.ark.runtime.service.ArkService$Builder')",
+      "Bash(awk '/^const renderMultiOrganCharts/,/^}$/ {print NR\": \"$0}' d:/Cursor_workshop/frontend/src/views/AdminView.vue)"
     ]
   }
 }

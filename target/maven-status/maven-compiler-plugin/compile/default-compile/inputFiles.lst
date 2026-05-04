@@ -20,6 +20,7 @@ D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\config\A
 D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\service\impl\UserServiceImpl.java
 D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\controller\AdminDatasetRawController.java
 D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\dto\CommentAuditRequest.java
+D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\dto\IndicatorAiComparison.java
 D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\service\UserService.java
 D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\service\SimulationEngineService.java
 D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\common\Result.java
@@ -35,6 +36,7 @@ D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\dto\Orga
 D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\controller\SimulationReportController.java
 D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\mapper\CommentMapper.java
 D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\service\impl\DatasetRawAdminServiceImpl.java
+D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\dto\MultiOrganAiComparisonResult.java
 D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\entity\SimulationRecord.java
 D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\service\LlmContextBuilder.java
 D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\controller\SimulationController.java
@@ -50,6 +52,7 @@ D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\security
 D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\common\ExperimentStatuses.java
 D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\dto\PageResult.java
 D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\controller\ExperimentController.java
+D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\dto\MultiIndicatorAiComparisonRequest.java
 D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\common\CommentStatuses.java
 D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\dto\MultiOrganSimulationRequest.java
 D:\Cursor_workshop\backend_server\src\main\java\com\example\digitaltwin\controller\AdminDashboardController.java
